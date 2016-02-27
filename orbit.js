@@ -5,14 +5,14 @@ config = {
   planetPos: [300, 480 + 600 - 100],
   G: 10000000,
   shipVertices: [[-5, -10], [0, -16], [5, -10], [5, 10], [9, 14], [-9, 14], [-5,10]],
-  maxRuntime: 5
+  maxRuntime: 15
 }
 
 initialState = {
   frame: 0,
   time: 0,
-  shipPos: [0, 200],
-  shipV: [100, 0]
+  shipPos: [300, 365],
+  shipV: [30, -100]
 }
 
 window.onload = function() {
