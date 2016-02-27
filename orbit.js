@@ -2,30 +2,40 @@ config = {
   bgColor: '#FF3333',
   fgColor: '#FFFFFF',
   planetRadius: 600,
-  shipVertices: [[-5, -10], [0, -16], [5, -10], [5, 10], [9, 14], [-9, 14], [-5,10]]
+  shipVertices: [[-5, -10], [0, -16], [5, -10], [5, 10], [9, 14], [-9, 14], [-5,10]],
+  maxRuntime: 3,
+}
+
+initialState = {
+  frame: 0,
+  time: 0,
+  shipPos: [200, 200],
+  shipV: [100, 0],
+  shipAngle: 0,
+  shipAngleV: Math.PI*2
 }
 
 window.onload = function() {
-  window.requestAnimationFrame(tick.bind(null, init()))
+  window.requestAnimationFrame(tick.bind(null, initialState))
 }
 
-function init() {
-  return {
-    shipPos: [200, 200],
-    shipAngle: 0
-  }
-}
-
-function tick(state, dt) {
-  state = update(state, dt)
+function tick(state, time) {
+  state = update(state, time / 1000)
   render(state)
-  window.requestAnimationFrame(tick.bind(null, state))
+  if (time/1000 < config.maxRuntime)
+    window.requestAnimationFrame(tick.bind(null, state))
 }
 
-function update(state, dt) {
-  state.shipPos[0] += 1
-  state.shipAngle += .02
-  return state
+function update(oldState, newTime) {
+  var dt = newTime - oldState.time
+  return {
+    time: newTime,
+    frame: oldState.frame + 1,
+    shipPos: oldState.shipPos.add(oldState.shipV.mul(dt)),
+    shipV: oldState.shipV,
+    shipAngle: oldState.shipAngle + oldState.shipAngleV * dt,
+    shipAngleV: oldState.shipAngleV
+  }
 }
 
 function render(state) {
