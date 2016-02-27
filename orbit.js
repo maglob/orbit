@@ -5,16 +5,14 @@ config = {
   planetPos: [300, 480 + 600 - 100],
   G: 10000000,
   shipVertices: [[-5, -10], [0, -16], [5, -10], [5, 10], [9, 14], [-9, 14], [-5,10]],
-  maxRuntime: 5,
+  maxRuntime: 5
 }
 
 initialState = {
   frame: 0,
   time: 0,
   shipPos: [0, 200],
-  shipV: [100, 0],
-  shipAngle: Math.PI / 2,
-  shipAngleV: Math.PI*2 / 32
+  shipV: [100, 0]
 }
 
 window.onload = function() {
@@ -36,35 +34,41 @@ function update(oldState, newTime) {
     time: newTime,
     frame: oldState.frame + 1,
     shipPos: oldState.shipPos.add(oldState.shipV.mul(dt)),
-    shipV: oldState.shipV.add(gravity.mul(dt)),
-    shipAngle: oldState.shipAngle + oldState.shipAngleV * dt,
-    shipAngleV: oldState.shipAngleV
+    shipV: oldState.shipV.add(gravity.mul(dt))
   }
 }
 
 function render(state) {
   var canvas = document.getElementById('canvas')
   gc = canvas.getContext('2d')
+
   gc.fillStyle = config.bgColor
   gc.fillRect(0, 0, canvas.width, canvas.height)
 
   gc.fillStyle = config.fgColor
-  gc.beginPath()
-  gc.arc(config.planetPos[0], config.planetPos[1], config.planetRadius, 0, Math.PI*2)
-  gc.fill()
+  gc.save()
+  gc.translate(config.planetPos[0], config.planetPos[1])
+  fillCircle(gc, config.planetRadius)
+  gc.restore()
 
-  drawShip(gc, state.shipPos[0], state.shipPos[1], state.shipAngle)
+  gc.save()
+  var vy = state.shipV.unit().mul(-1)
+  var vx = [-vy[1], vy[0]]
+  gc.transform(vx[0], vx[1], vy[0], vy[1], state.shipPos[0], state.shipPos[1])
+  fillPolygon(gc, config.shipVertices)
+  gc.restore()
 }
 
-function drawShip(gc, x, y, a) {
-  gc.save()
+function fillCircle(gc, r) {
   gc.beginPath()
-  gc.fillStyle = config.fgColor
-  gc.translate(x, y)
-  gc.rotate(a)
-  config.shipVertices.forEach(function(e, i) {
+  gc.arc(0, 0, r, 0, Math.PI*2)
+  gc.fill()
+}
+
+function fillPolygon(gc, vertices) {
+  gc.beginPath()
+  vertices.forEach(function(e, i) {
     i==0 ? gc.moveTo(e[0], e[1]) : gc.lineTo(e[0], e[1])
   })
   gc.fill()
-  gc.restore()
 }
