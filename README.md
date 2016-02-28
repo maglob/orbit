@@ -1,3 +1,3 @@
-Game with rockets and satelites in orbit
+Game with rockets and satellites in orbit
 
 Live demo http://maglob.github.io/orbit/
