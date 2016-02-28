@@ -5,6 +5,8 @@ config = {
   planetPos: [300, 480 + 600 - 100],
   G: 10000000,
   shipVertices: [[-5, -10], [0, -16], [5, -10], [5, 10], [9, 14], [-9, 14], [-5,10]],
+  enginePower: 80,
+  fuelConsumption: 1,
   maxRuntime: 15
 }
 
@@ -12,7 +14,9 @@ initialState = {
   frame: 0,
   time: 0,
   shipPos: [300, 365],
-  shipV: [30, -100]
+  shipV: [0, -1],
+  thrustV: [10, -100].unit(),
+  fuel: 100
 }
 
 window.onload = function() {
@@ -34,7 +38,9 @@ function update(oldState, newTime) {
     time: newTime,
     frame: oldState.frame + 1,
     shipPos: oldState.shipPos.add(oldState.shipV.mul(dt)),
-    shipV: oldState.shipV.add(gravity.mul(dt))
+    shipV: oldState.shipV.add(gravity.mul(dt)).add(oldState.thrustV.mul(dt * config.enginePower)),
+    thrustV: oldState.fuel > 0 ? oldState.thrustV : [0, 0],
+    fuel: oldState.fuel - config.fuelConsumption
   }
 }
 
