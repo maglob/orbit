@@ -7,7 +7,7 @@ config = {
   shipVertices: [[-5, -10], [0, -16], [5, -10], [5, 10], [9, 14], [-9, 14], [-5,10]],
   enginePower: 80,
   fuelConsumption: 1,
-  maxRuntime: 60
+  maxRuntime: 60*5
 }
 
 initialState = {
@@ -16,8 +16,8 @@ initialState = {
   isCrash: false,
   shipPos: [300, 365],
   shipV: [0, -1],
-  thrustV: [10, -100].unit(),
-  fuel: 90
+  thrustV: [110, -100].unit(),
+  fuel: 120
 }
 
 window.onload = function() {
@@ -53,6 +53,13 @@ function render(state) {
   gc.fillStyle = config.bgColor
   gc.fillRect(0, 0, canvas.width, canvas.height)
 
+  gc.save()
+  gc.translate(canvas.width/2, canvas.height/2)
+  var altitude = state.shipPos.sub(config.planetPos).norm() - config.planetRadius
+  var zoom =  altitude > 200 ? 200/altitude : 1
+  gc.scale(zoom, zoom)
+  gc.translate(-state.shipPos[0], -state.shipPos[1])
+
   gc.fillStyle = config.fgColor
   gc.save()
   gc.translate(config.planetPos[0], config.planetPos[1])
@@ -64,6 +71,7 @@ function render(state) {
   var vx = [-vy[1], vy[0]]
   gc.transform(vx[0], vx[1], vy[0], vy[1], state.shipPos[0], state.shipPos[1])
   fillPolygon(gc, config.shipVertices)
+  gc.restore()
   gc.restore()
 
   document.getElementById('crash').style.display = state.isCrash ? 'block' : 'none'
