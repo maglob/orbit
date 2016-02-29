@@ -7,7 +7,8 @@ config = {
   shipVertices: [[-5, -10], [0, -16], [5, -10], [5, 10], [9, 14], [-9, 14], [-5,10]],
   enginePower: 80,
   fuelConsumption: 1,
-  maxRuntime: 60*5
+  maxRuntime: 60*5,
+  dt: 1 / 60
 }
 
 initialState = {
@@ -21,22 +22,21 @@ initialState = {
 }
 
 window.onload = function() {
+  render(initialState)
   window.requestAnimationFrame(tick.bind(null, initialState))
 }
 
 function tick(state, time) {
-  state = update(state, time / 1000)
+  state = update(state, config.dt)
   render(state)
   if (!state.isCrash && (time/1000 < config.maxRuntime))
     window.requestAnimationFrame(tick.bind(null, state))
 }
 
-function update(oldState, newTime) {
-  var dt = newTime - oldState.time
+function update(oldState, dt) {
   var altitude = oldState.shipPos.sub(config.planetPos).norm()
   var gravity = config.planetPos.sub(oldState.shipPos).unit().mul(config.G / (altitude * altitude))
   return {
-    time: newTime,
     frame: oldState.frame + 1,
     shipPos: oldState.shipPos.add(oldState.shipV.mul(dt)),
     shipV: oldState.shipV.add(gravity.mul(dt)).add(oldState.thrustV.mul(dt * config.enginePower)),
