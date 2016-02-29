@@ -17,3 +17,7 @@ Array.prototype.norm = function() {
 Array.prototype.unit = function() {
   return this.mul(1 / this.norm())
 }
+
+function vectorFromAngle(a) {
+  return [Math.cos(a), -Math.sin(a)]
+}
