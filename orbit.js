@@ -5,6 +5,7 @@ config = {
   planetPos: [300, 480 + 600 - 100],
   G: 10000000,
   shipVertices: [[-5, -10], [0, -16], [5, -10], [5, 10], [9, 14], [-9, 14], [-5,10]],
+  exhaustVertices: [[-6,10], [6,10], [0,25]],
   enginePower: 80,
   fuelConsumption: 1,
   maxRuntime: 60*5,
@@ -71,6 +72,8 @@ function render(state) {
   var vx = [-vy[1], vy[0]]
   gc.transform(vx[0], vx[1], vy[0], vy[1], state.shipPos[0], state.shipPos[1])
   fillPolygon(gc, config.shipVertices)
+  if (state.fuel > 0 && state.frame % 4 >= 2)
+    fillPolygon(gc, config.exhaustVertices)
   gc.restore()
   gc.restore()
 
