@@ -1,8 +1,15 @@
+input = {
+  thrustV: vectorFromAngle(0),
+  fuel: 160
+}
+
 config = {
   bgColor: '#FF3333',
   fgColor: '#FFFFFF',
   planetRadius: 600,
   planetPos: [300, 480 + 600 - 100],
+  shipInitialPos: [300, 365],
+  shipInitialV: [0, -.1],
   G: 10000000,
   shipVertices: [[-5, -10], [0, -16], [5, -10], [5, 10], [9, 14], [-9, 14], [-5,10]],
   exhaustVertices: [[-6,10], [6,10], [0,25]],
@@ -13,19 +20,20 @@ config = {
   dt: 1 / 60
 }
 
-initialState = {
-  frame: 0,
-  time: 0,
-  isCrash: false,
-  shipPos: [300, 365],
-  shipV: [0, -1],
-  thrustV: vectorFromAngle(0),
-  fuel: 160
+window.onload = function() {
+  render(initialState())
+  window.requestAnimationFrame(tick.bind(null, initialState()))
 }
 
-window.onload = function() {
-  render(initialState)
-  window.requestAnimationFrame(tick.bind(null, initialState))
+function initialState() {
+  return {
+    frame: 0,
+    time: 0,
+    isCrash: false,
+    shipPos: config.shipInitialPos,
+    shipV: config.shipInitialV,
+    fuel: input.fuel
+  }
 }
 
 function tick(state, time) {
@@ -39,14 +47,13 @@ function update(oldState, dt) {
   var altitude = oldState.shipPos.sub(config.planetPos).norm()
   var gravity = config.planetPos.sub(oldState.shipPos).unit().mul(config.G / (altitude * altitude))
   var thrust = oldState.fuel > 0
-    ? (oldState.time > config.pitchoverTime ? oldState.thrustV : [0,-1])
+    ? (oldState.time > config.pitchoverTime ? input.thrustV : [0,-1])
     : [0, 0]
   return {
     frame: oldState.frame + 1,
     time: oldState.time + dt,
     shipPos: oldState.shipPos.add(oldState.shipV.mul(dt)),
     shipV: oldState.shipV.add(gravity.mul(dt)).add(thrust.mul(dt * config.enginePower)),
-    thrustV: oldState.thrustV,
     fuel: oldState.fuel - config.fuelConsumption,
     isCrash: config.planetPos.sub(oldState.shipPos).norm() < config.planetRadius
   }
