@@ -1,5 +1,5 @@
 input = {
-  thrustV: vectorFromAngle(0),
+  thrustAngle: 0,
   fuel: 160
 }
 
@@ -16,13 +16,35 @@ config = {
   enginePower: 80,
   fuelConsumption: 1,
   pitchoverTime: 1,
-  maxRuntime: 60*5,
   dt: 1 / 60
 }
 
 window.onload = function() {
+  document.getElementById('fuel').value = input.fuel
+  document.getElementById('angle').value = input.thrustAngle
+  var launchPressed = false
+  document.getElementById('launch').addEventListener('click', function() {
+    launchPressed = true
+  })
   render(initialState())
   window.requestAnimationFrame(tick.bind(null, initialState()))
+
+  function tick(state, time) {
+    if (launchPressed) {
+      launchPressed = false
+      input = {
+        fuel: parseFloat(document.getElementById('fuel').value),
+        thrustAngle: parseFloat(document.getElementById('angle').value)
+      }
+      state = initialState()
+    }
+    if (!state.isCrash) {
+      state = update(state, config.dt)
+      render(state)
+      renderStats(state)
+    }
+    window.requestAnimationFrame(tick.bind(null, state))
+  }
 }
 
 function initialState() {
@@ -36,27 +58,26 @@ function initialState() {
   }
 }
 
-function tick(state, time) {
-  state = update(state, config.dt)
-  render(state)
-  if (!state.isCrash && (time/1000 < config.maxRuntime))
-    window.requestAnimationFrame(tick.bind(null, state))
-}
-
 function update(oldState, dt) {
   var altitude = oldState.shipPos.sub(config.planetPos).norm()
   var gravity = config.planetPos.sub(oldState.shipPos).unit().mul(config.G / (altitude * altitude))
   var thrust = oldState.fuel > 0
-    ? (oldState.time > config.pitchoverTime ? input.thrustV : [0,-1])
+    ? (oldState.time > config.pitchoverTime ? vectorFromAngle(input.thrustAngle/180*Math.PI) : [0,-1])
     : [0, 0]
   return {
     frame: oldState.frame + 1,
     time: oldState.time + dt,
     shipPos: oldState.shipPos.add(oldState.shipV.mul(dt)),
     shipV: oldState.shipV.add(gravity.mul(dt)).add(thrust.mul(dt * config.enginePower)),
-    fuel: oldState.fuel - config.fuelConsumption,
+    fuel: Math.max(0, oldState.fuel - config.fuelConsumption),
     isCrash: config.planetPos.sub(oldState.shipPos).norm() < config.planetRadius
   }
+}
+
+function renderStats(state) {
+  document.getElementById('time').textContent = (state.time).toFixed(2)
+  document.getElementById('speed').textContent = (state.shipV.norm()).toFixed(2)
+  document.getElementById('altitude').textContent = (state.shipPos.sub(config.planetPos).norm() - config.planetRadius).toFixed(2)
 }
 
 function render(state) {
