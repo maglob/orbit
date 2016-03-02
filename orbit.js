@@ -3,8 +3,6 @@ config = {
   fgColor: '#FFFFFF',
   planetRadius: 600,
   planetPos: [300, 480 + 600 - 100],
-  shipInitialPos: [300, 365],
-  shipInitialV: [0, -.1],
   G: 10000000,
   shipVertices: [[-5, -10], [0, -16], [5, -10], [5, 10], [9, 14], [-9, 14], [-5,10]],
   exhaustVertices: [[-6,10], [6,10], [0,25]],
@@ -49,8 +47,8 @@ function update(oldState, input, dt) {
       frame: 0,
       time: 0,
       isCrash: false,
-      shipPos: config.shipInitialPos,
-      shipV: config.shipInitialV,
+      shipPos: config.planetPos.add([0, -config.planetRadius - 15]),
+      shipV: [0, 0],
       fuel: input.fuel
     }
   else if(oldState.isCrash)
@@ -109,14 +107,12 @@ function render(state) {
   fillCircle(gc, config.planetRadius)
   gc.restore()
 
-  gc.save()
-  var vy = state.shipV.unit().mul(-1)
+  var vy = state.shipV.norm() > 0 ? state.shipV.unit().mul(-1) : [0, 1]
   var vx = [-vy[1], vy[0]]
   gc.transform(vx[0], vx[1], vy[0], vy[1], state.shipPos[0], state.shipPos[1])
   fillPolygon(gc, config.shipVertices)
   if (state.fuel > 0 && state.frame % 4 >= 2)
     fillPolygon(gc, config.exhaustVertices)
-  gc.restore()
   gc.restore()
 
   document.getElementById('crash').style.display = state.isCrash ? 'block' : 'none'
