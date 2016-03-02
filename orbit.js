@@ -20,8 +20,8 @@ config = {
 }
 
 window.onload = function() {
-  document.getElementById('fuel').value = input.fuel
-  document.getElementById('angle').value = input.thrustAngle
+  uiSet('fuel', input.fuel)
+  uiSet('angle', input.thrustAngle)
   var launchPressed = false
   document.getElementById('launch').addEventListener('click', function() {
     launchPressed = true
@@ -33,8 +33,8 @@ window.onload = function() {
     if (launchPressed) {
       launchPressed = false
       input = {
-        fuel: parseFloat(document.getElementById('fuel').value),
-        thrustAngle: parseFloat(document.getElementById('angle').value)
+        fuel: parseFloat(uiGet('fuel')),
+        thrustAngle: parseFloat(uiGet('angle'))
       }
       state = initialState()
     }
@@ -76,9 +76,21 @@ function update(oldState, dt) {
 }
 
 function renderStats(state) {
-  document.getElementById('time').textContent = (state.time).toFixed(2)
-  document.getElementById('speed').textContent = (state.shipV.norm()).toFixed(2)
-  document.getElementById('altitude').textContent = (state.shipPos.sub(config.planetPos).norm() - config.planetRadius).toFixed(2)
+  uiSet('time', (state.time).toFixed(2))
+  uiSet('speed', (state.shipV.norm()).toFixed(2))
+  uiSet('altitude', (state.shipPos.sub(config.planetPos).norm() - config.planetRadius).toFixed(2))
+}
+
+function uiSet(id, value) {
+  var e = document.getElementById(id)
+  if (e.value == undefined)
+    e.textContent = value
+  else
+    e.value = value
+}
+
+function uiGet(id) {
+  return document.getElementById(id).value
 }
 
 function render(state) {
