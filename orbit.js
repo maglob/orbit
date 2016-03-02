@@ -19,6 +19,13 @@ window.onload = function() {
   }
   uiSet('fuel', input.fuel)
   uiSet('angle', input.thrustAngle)
+
+  uiSet('planetRadius', config.planetRadius)
+  uiSet('G', config.G)
+  uiSet('enginePower', config.enginePower)
+  uiSet('fuelConsumption', config.fuelConsumption)
+  uiSet('pitchoverTime', config.pitchoverTime)
+
   var launchPressed = false
   document.getElementById('launch').addEventListener('click', function() {
     launchPressed = true
@@ -31,6 +38,11 @@ window.onload = function() {
         fuel: parseFloat(uiGet('fuel')),
         thrustAngle: parseFloat(uiGet('angle'))
       }
+      config.planetRadius = parseFloat(uiGet('planetRadius'))
+      config.G = parseFloat(uiGet('G'))
+      config.enginePower = parseFloat(uiGet('enginePower'))
+      config.fuelConsumption = parseFloat(uiGet('fuelConsumption'))
+      config.pitchoverTime = parseFloat(uiGet('pitchoverTime'))
       state = null
     }
     state = update(state, input, config.dt)
