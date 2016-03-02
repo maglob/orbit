@@ -1,8 +1,3 @@
-input = {
-  thrustAngle: 0,
-  fuel: 160
-}
-
 config = {
   bgColor: '#FF3333',
   fgColor: '#FFFFFF',
@@ -20,46 +15,47 @@ config = {
 }
 
 window.onload = function() {
+  var input = {
+    thrustAngle: 0,
+    fuel: 160
+  }
   uiSet('fuel', input.fuel)
   uiSet('angle', input.thrustAngle)
   var launchPressed = false
   document.getElementById('launch').addEventListener('click', function() {
     launchPressed = true
-  })
-  render(initialState())
-  window.requestAnimationFrame(tick.bind(null, initialState()))
+  });
 
-  function tick(state, time) {
+  (function tick(state) {
     if (launchPressed) {
       launchPressed = false
       input = {
         fuel: parseFloat(uiGet('fuel')),
         thrustAngle: parseFloat(uiGet('angle'))
       }
-      state = initialState()
+      state = null
     }
-    if (!state.isCrash) {
-      state = update(state, config.dt)
-      render(state)
-      if (state.frame % 10 == 0)
-        renderStats(state)
-    }
+    state = update(state, input, config.dt)
+    render(state)
+    if (state.frame % 10 == 0)
+      renderStats(state)
     window.requestAnimationFrame(tick.bind(null, state))
-  }
+  })()
 }
 
-function initialState() {
-  return {
-    frame: 0,
-    time: 0,
-    isCrash: false,
-    shipPos: config.shipInitialPos,
-    shipV: config.shipInitialV,
-    fuel: input.fuel
-  }
-}
+function update(oldState, input, dt) {
+  if (!oldState)
+    return {
+      frame: 0,
+      time: 0,
+      isCrash: false,
+      shipPos: config.shipInitialPos,
+      shipV: config.shipInitialV,
+      fuel: input.fuel
+    }
+  else if(oldState.isCrash)
+    return oldState
 
-function update(oldState, dt) {
   var altitude = oldState.shipPos.sub(config.planetPos).norm()
   var gravity = config.planetPos.sub(oldState.shipPos).unit().mul(config.G / (altitude * altitude))
   var thrust = oldState.fuel > 0
