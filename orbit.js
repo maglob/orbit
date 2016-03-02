@@ -41,7 +41,8 @@ window.onload = function() {
     if (!state.isCrash) {
       state = update(state, config.dt)
       render(state)
-      renderStats(state)
+      if (state.frame % 10 == 0)
+        renderStats(state)
     }
     window.requestAnimationFrame(tick.bind(null, state))
   }
