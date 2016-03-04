@@ -85,6 +85,7 @@ function renderStats(state) {
   uiSet('time', (state.time).toFixed(2))
   uiSet('speed', (state.shipV.norm()).toFixed(2))
   uiSet('altitude', (state.shipPos.sub(config.planetPos).norm() - config.planetRadius).toFixed(2))
+  uiSet('heading', (state.shipV.angle()*180/Math.PI).toFixed(0))
 }
 
 function uiSet(id, value) {

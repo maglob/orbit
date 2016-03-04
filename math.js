@@ -18,6 +18,13 @@ Array.prototype.unit = function() {
   return this.mul(1 / this.norm())
 }
 
+Array.prototype.angle = function() {
+  var a = Math.atan(this[1] / this[0])
+  return  this[0] >= 0
+    ? (this[1] > 0 ? 2*Math.PI - a : -a)
+    : Math.PI - a
+}
+
 function vectorFromAngle(a) {
   return [Math.cos(a), -Math.sin(a)]
 }
