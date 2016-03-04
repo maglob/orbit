@@ -9,7 +9,8 @@ config = {
   enginePower: 80,
   fuelConsumption: 1,
   pitchoverTime: 1,
-  dt: 1 / 60
+  dt: 1 / 60,
+  timeSpeedup: 1
 }
 
 window.onload = function() {
@@ -25,11 +26,13 @@ window.onload = function() {
   uiSet('enginePower', config.enginePower)
   uiSet('fuelConsumption', config.fuelConsumption)
   uiSet('pitchoverTime', config.pitchoverTime)
+  uiSet('timeSpeedup', config.timeSpeedup)
 
   var launchPressed = false
   document.getElementById('launch').addEventListener('click', function() {
     launchPressed = true
-  });
+  })
+  var renderFrame = 0;
 
   (function tick(state) {
     if (launchPressed) {
@@ -43,11 +46,13 @@ window.onload = function() {
       config.enginePower = parseFloat(uiGet('enginePower'))
       config.fuelConsumption = parseFloat(uiGet('fuelConsumption'))
       config.pitchoverTime = parseFloat(uiGet('pitchoverTime'))
+      config.timeSpeedup = parseFloat(uiGet('timeSpeedup'))
       state = null
     }
-    state = update(state, input, config.dt)
+    for (var i=0; i<config.timeSpeedup; i++)
+      state = update(state, input, config.dt)
     render(state)
-    if (state.frame % 10 == 0)
+    if (renderFrame++ % 10 == 0)
       renderStats(state)
     window.requestAnimationFrame(tick.bind(null, state))
   })()
