@@ -140,9 +140,11 @@ function render(state) {
   gc.save()
   gc.translate(canvas.width/2, canvas.height/2)
   var altitude = state.shipPos.sub(config.planetPos).norm() - config.planetRadius
-  var zoom =  altitude > 200 ? 200/altitude : 1
+  var zoom =  altitude > 400 ? 400/altitude : 1
   gc.scale(zoom, zoom)
-  gc.translate(-state.shipPos[0], -state.shipPos[1])
+  var posSurface = config.planetPos.add(state.shipPos.sub(config.planetPos).unit().mul(config.planetRadius))
+  var p = posSurface.add(state.shipPos).mul(.5)
+  gc.translate(-p[0], -p[1])
 
   gc.fillStyle = config.fgColor
   gc.save()
