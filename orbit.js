@@ -8,7 +8,7 @@ config = {
   exhaustVertices: [[-6,10], [6,10], [0,25]],
   enginePower: 84,
   fuelConsumption: 1,
-  pitchoverTime: 1,
+  pitchoverTime: 1.5,
   dt: 1 / 60,
   timeSpeedup: 1,
   plotCourse: true
@@ -16,8 +16,8 @@ config = {
 
 window.onload = function() {
   var input = {
-    thrustAngle: 0,
-    fuel: 160
+    thrustAngle: -30,
+    fuel: 190
   }
   uiSet('fuel', input.fuel)
   uiSet('angle', input.thrustAngle)
