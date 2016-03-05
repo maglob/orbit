@@ -6,7 +6,7 @@ config = {
   G: 10000000,
   shipVertices: [[-5, -10], [0, -16], [5, -10], [5, 10], [9, 14], [-9, 14], [-5,10]],
   exhaustVertices: [[-6,10], [6,10], [0,25]],
-  enginePower: 80,
+  enginePower: 82,
   fuelConsumption: 1,
   pitchoverTime: 1,
   dt: 1 / 60,
@@ -71,18 +71,32 @@ function update(oldState, input, dt) {
   else if(oldState.isCrash)
     return oldState
 
-  var altitude = oldState.shipPos.sub(config.planetPos).norm()
-  var gravity = config.planetPos.sub(oldState.shipPos).unit().mul(config.G / (altitude * altitude))
-  var thrust = oldState.fuel > 0
+  var gravity = rk4(gravityAt, oldState.shipPos, dt).mul(dt)
+  var thrust = (oldState.fuel > 0
     ? (oldState.time > config.pitchoverTime ? vectorFromAngle(input.thrustAngle/180*Math.PI) : [0,-1])
-    : [0, 0]
+    : [0, 0]).mul(config.enginePower * dt)
+  var newV = oldState.shipV.add(gravity).add(thrust)
+  
   return {
     frame: oldState.frame + 1,
     time: oldState.time + dt,
-    shipPos: oldState.shipPos.add(oldState.shipV.mul(dt)),
-    shipV: oldState.shipV.add(gravity.mul(dt)).add(thrust.mul(dt * config.enginePower)),
+    shipPos: oldState.shipPos.add(oldState.shipV.add(newV).mul(dt/2)),
+    shipV: newV,
     fuel: Math.max(0, oldState.fuel - config.fuelConsumption),
     isCrash: config.planetPos.sub(oldState.shipPos).norm() < config.planetRadius
+  }
+
+  function gravityAt(p) {
+    var d = p.sub(config.planetPos).norm()
+    return config.planetPos.sub(p).unit().mul(config.G / (d*d))
+  }
+
+  function rk4(fn, pos, dt) {
+    var k1 = fn(pos)
+    var k2 = fn(pos.add(k1.mul(dt/2)))
+    var k3 = fn(pos.add(k2.mul(dt/2)))
+    var k4 = fn(pos.add(k3.mul(dt)))
+    return k1.add(k2.add(k3).mul(2)).add(k4).mul(1/6)
   }
 }
 
