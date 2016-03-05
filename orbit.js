@@ -6,7 +6,7 @@ config = {
   G: 10000000,
   shipVertices: [[-5, -10], [0, -16], [5, -10], [5, 10], [9, 14], [-9, 14], [-5,10]],
   exhaustVertices: [[-6,10], [6,10], [0,25]],
-  enginePower: 82,
+  enginePower: 84,
   fuelConsumption: 1,
   pitchoverTime: 1,
   dt: 1 / 60,
@@ -83,10 +83,11 @@ function update(oldState, input, dt) {
   var dots = config.plotCourse
     ? (oldState.dots.concat(oldState.frame % 30 == 0 ? [oldState.shipPos] : []))
     : []
+
   return {
     frame: oldState.frame + 1,
     time: oldState.time + dt,
-    shipPos: oldState.shipPos.add(oldState.shipV.add(newV).mul(dt/2)),
+    shipPos: oldState.shipPos.add(newV.mul(dt)),
     shipV: newV,
     fuel: Math.max(0, oldState.fuel - config.fuelConsumption),
     isCrash: config.planetPos.sub(oldState.shipPos).norm() < config.planetRadius,
