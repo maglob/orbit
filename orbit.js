@@ -10,7 +10,8 @@ config = {
   fuelConsumption: 1,
   pitchoverTime: 1,
   dt: 1 / 60,
-  timeSpeedup: 1
+  timeSpeedup: 1,
+  plotCourse: true
 }
 
 window.onload = function() {
@@ -27,6 +28,7 @@ window.onload = function() {
   uiSet('fuelConsumption', config.fuelConsumption)
   uiSet('pitchoverTime', config.pitchoverTime)
   uiSet('timeSpeedup', config.timeSpeedup)
+  uiSet('plotCourse', config.plotCourse)
 
   var launchPressed = false
   document.getElementById('launch').addEventListener('click', function() {
@@ -47,6 +49,7 @@ window.onload = function() {
       config.fuelConsumption = parseFloat(uiGet('fuelConsumption'))
       config.pitchoverTime = parseFloat(uiGet('pitchoverTime'))
       config.timeSpeedup = parseFloat(uiGet('timeSpeedup'))
+      config.plotCourse = uiGet('plotCourse')
       state = null
     }
     for (var i=0; i<config.timeSpeedup; i++)
@@ -66,7 +69,8 @@ function update(oldState, input, dt) {
       isCrash: false,
       shipPos: config.planetPos.add([0, -config.planetRadius - 15]),
       shipV: [0, 0],
-      fuel: input.fuel
+      fuel: input.fuel,
+      dots: []
     }
   else if(oldState.isCrash)
     return oldState
@@ -76,14 +80,17 @@ function update(oldState, input, dt) {
     ? (oldState.time > config.pitchoverTime ? vectorFromAngle(input.thrustAngle/180*Math.PI) : [0,-1])
     : [0, 0]).mul(config.enginePower * dt)
   var newV = oldState.shipV.add(gravity).add(thrust)
-  
+  var dots = config.plotCourse
+    ? (oldState.dots.concat(oldState.frame % 30 == 0 ? [oldState.shipPos] : []))
+    : []
   return {
     frame: oldState.frame + 1,
     time: oldState.time + dt,
     shipPos: oldState.shipPos.add(oldState.shipV.add(newV).mul(dt/2)),
     shipV: newV,
     fuel: Math.max(0, oldState.fuel - config.fuelConsumption),
-    isCrash: config.planetPos.sub(oldState.shipPos).norm() < config.planetRadius
+    isCrash: config.planetPos.sub(oldState.shipPos).norm() < config.planetRadius,
+    dots: dots
   }
 
   function gravityAt(p) {
@@ -109,14 +116,17 @@ function renderStats(state) {
 
 function uiSet(id, value) {
   var e = document.getElementById(id)
-  if (e.value == undefined)
-    e.textContent = value
-  else
+  if (e.type == 'checkbox')
+    e.checked = value
+  else if (e.type == 'text')
     e.value = value
+  else
+    e.textContent = value
 }
 
 function uiGet(id) {
-  return document.getElementById(id).value
+  var e = document.getElementById(id)
+  return e.type == 'checkbox' ? e.checked : e.value
 }
 
 function render(state) {
@@ -138,6 +148,12 @@ function render(state) {
   gc.translate(config.planetPos[0], config.planetPos[1])
   fillCircle(gc, config.planetRadius)
   gc.restore()
+
+  state.dots.forEach(function(e) {
+    gc.beginPath()
+    gc.arc(e[0], e[1], 2, 0, Math.PI*2)
+    gc.fill()
+  })
 
   var vy = state.shipV.norm() > 0 ? state.shipV.unit().mul(-1) : [0, 1]
   var vx = [-vy[1], vy[0]]
